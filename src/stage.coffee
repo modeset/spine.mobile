@@ -1,4 +1,3 @@
-Spine = require('spine')
 $     = Spine.$
 
 globalManager = new Spine.Manager
@@ -6,37 +5,46 @@ globalManager = new Spine.Manager
 class Stage extends Spine.Controller
   @globalManager: -> globalManager
   @globalStage:   -> @globalManager().controllers[0]
-  
+
   effectDefaults:
-    duration: 450
-    easing: 'cubic-bezier(.25, .1, .25, 1)'
-    
+    duration: 250
+    easing: 'ease-in-out'
+
   effectOptions: (options = {})  ->
     $.extend({}, @effectDefaults, options)
 
   viewport: true
-  
+
+  elements:
+    'header':   'header'
+    'article':  'content'
+    'footer':   'footer'
+
   constructor: ->
     super
     @el.addClass('stage')
-    
-    @header  = $('<header />')
-    @content = $('<article />')
-    @footer  = $('<footer />')
-    
-    @content.addClass('viewport') if @viewport
-    
-    @el.append(@header, @content, @footer)
+
+    if @global
+      @header  = $('<header />')
+      @content = $('<article />')
+      @footer  = $('<footer />')
+
+      @content.addClass('viewport') if @viewport
+
+      @el.append @header
+      @el.append @content
+      @el.append @footer
+
     globalManager.add(@) if @global
-    
-  append: (elements...) -> 
+
+  append: (elements...) ->
     elements = (e.el or e for e in elements)
     @content.append(elements...)
 
-  html: -> 
-    @content.html.apply(@content, arguments)
+  html: ->
+    @el.html.apply(@el, arguments)
     @refreshElements()
-    @content
+    @el
 
   add: (panels...) ->
     @manager or= new Spine.Manager
@@ -57,28 +65,58 @@ class Stage extends Spine.Controller
       @reverseEffects[effect].apply(this)
     else
       @el.removeClass('active')
-    
+
   isActive: ->
     @el.hasClass('active')
 
   effects:
     left: ->
-      @el.addClass('active')
-      @el.gfxSlideIn(@effectOptions(direction: 'left'))
-    
+      @el.addClass 'active'
+      @el.addClass 'transitioning'
+      opts = @effectOptions()
+
+      animation = =>
+        @el.animate { translate3d: '100%, 0, 0' }, 0, null, =>
+          @el.animate { translate3d: '0, 0, 0' }, opts.duration, opts.easing, =>
+            @el.removeClass 'transitioning'
+            @trigger 'activated'
+      setTimeout animation, 0
+
     right: ->
-      @el.addClass('active')
-      @el.gfxSlideIn(@effectOptions(direction: 'right'))
-  
+      @el.addClass 'active'
+      @el.addClass 'transitioning'
+      opts = @effectOptions()
+
+      animation = =>
+        @el.animate { translate3d: '-100%, 0, 0' }, 0, null, =>
+          @el.animate { translate3d: '0, 0, 0' }, opts.duration, opts.easing, =>
+            @el.removeClass 'transitioning'
+            @trigger 'activated'
+      setTimeout animation, 0
+
   reverseEffects:
     left: ->
-      @el.gfxSlideOut(@effectOptions(direction: 'right'))
-      @el.queueNext => @el.removeClass('active')
-    
+      opts = @effectOptions()
+      @el.addClass 'transitioning'
+      animation = =>
+        @el.animate { translate3d: '0, 0, 0' }, 0, null, =>
+          @el.animate { translate3d: '-100%, 0, 0' }, opts.duration, opts.easing, =>
+            @el.removeClass 'active'
+            @el.removeClass 'transitioning'
+            @trigger 'deactivated'
+      setTimeout animation, 0
+
     right: ->
-      @el.gfxSlideOut(@effectOptions(direction: 'left'))
-      @el.queueNext => @el.removeClass('active')
-      
+      opts = @effectOptions()
+      @el.addClass 'transitioning'
+      animation = =>
+        @el.animate { translate3d: '0, 0, 0' }, 0, null, =>
+          @el.animate { translate3d: '100%, 0, 0' }, opts.duration, opts.easing, =>
+            @el.removeClass 'active'
+            @el.removeClass 'transitioning'
+            @trigger 'deactivated'
+      setTimeout animation, 0
+
 class Stage.Global extends Stage
   global: true
 

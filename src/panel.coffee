@@ -1,67 +1,61 @@
-$     = Spine.$
-Gfx   = require('gfx')
-Stage = require('./stage')
-
 class Panel extends Stage
-  title: false
+
+  tag:      'section'
   viewport: false
 
   constructor: ->
     super
+    @elements['.scroll_inner'] = 'scrollInner'
+    @elements['.scroll_outer'] = 'scrollOuter'
+    @elements['.scroll_bar']   = 'scrollBar'
+
+    # Register with the global stage
     @el.removeClass('stage').addClass('panel')
-    @header.append($('<h2 />'))
-    @setTitle(@title) if @title
     @stage ?= Stage.globalStage()
     @stage?.add(@)
-    
-  setTitle: (title = '') ->
-    @header.find('h2:first').html(title)
-    
-  addButton: (text, callback) ->
-    callback = @[callback] if typeof callback is 'string'
-    button = $('<button />').text(text)
-    button.tap(@proxy(callback))
-    @header.append(button)
-    button
-  
-  activate: (params = {}) ->
-    effect = params.transition or params.trans
-    if effect
-      @effects[effect].apply(this)
-    else
-      @content.add(@header).show()
-      @el.addClass('active')
 
-  deactivate: (params = {}) ->
-    return unless @isActive()
-    effect = params.transition or params.trans
-    if effect
-      @reverseEffects[effect].apply(this)
-    else
-      @el.removeClass('active')
-  
-  effects:
-    left: ->
-      @el.addClass('active')
-      @content.gfxSlideIn(@effectOptions(direction: 'left'))
-      @header.gfxSlideIn(@effectOptions(direction: 'left', fade: true, distance: 50))
-    
-    right: ->
-      @el.addClass('active')
-      @content.gfxSlideIn(@effectOptions(direction: 'right'))
-      @header.gfxSlideIn(@effectOptions(direction: 'right', fade: true, distance: 50))
-  
-  reverseEffects:
-    left: ->
-      @content.gfxSlideOut(@effectOptions(direction: 'right'))
-      @header.gfxSlideOut(@effectOptions(direction: 'right', fade: true, distance: 50))
-      @content.queueNext => 
-        @el.removeClass('active')
-    
-    right: ->
-      @content.gfxSlideOut(@effectOptions(direction: 'left'))
-      @header.gfxSlideOut(@effectOptions(direction: 'left', fade: true, distance: 50))
-      @content.queueNext => 
-        @el.removeClass('active')
-        
+    # Set up the scroller
+    @shouldScroll = true
+    @bind 'activated', =>
+      @unbindScroller()
+      @bindScroller()
+    @bind 'deactivated', =>
+      @unbindScroller()
+
+    # Make sure we render the panel offscreen
+    @el.animate({translate3d: '100%, 0, 0'}, 0)
+
+  renderFragment: (name, context = {}) ->
+    @html JST[name](context)
+    @prepareScrollerElements()
+    @trigger 'rendered'
+
+  prepareScrollerElements: =>
+    # wrap article contents with scroll inner element. also add scroll bar indicator
+    @el.find('article').addClass('scroll_outer')
+    @refreshElements()
+    @scrollOuter.html("<div class='scroll_inner'>#{@scrollOuter.html()}</div><div class='scroll_bar'><div class='scroll_bar_pill'></div></div>")
+    @refreshElements()
+
+    $(@el.find('header')[0]).after("<div class='panel_disabler'></div>");
+    @refreshElements()
+
+  bindScroller: =>
+    if @shouldScroll && !@scroller
+      @scroller = new SectionFormScroller( @scrollOuter, @scrollInner, @scrollBar)
+      @scroller.init()
+      # Bind to destroy on release - this may be unnecessary since the controller will probably already have been deactivated
+      @release(@unbindScroller)
+      $(document).bind 'scroll_top', @scrollTop
+
+  unbindScroller: =>
+    if @scroller
+      @scroller.dispose()
+      @scroller = null
+      $(document).unbind 'scroll_top'
+
+  scrollTop: =>
+    if @scroller
+      @scroller.scrollToTop()
+
 (module?.exports = Panel) or @Panel = Panel
