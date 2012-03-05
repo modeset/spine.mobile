@@ -35,11 +35,10 @@ class Stage extends Spine.Controller
       @el.append @content
       @el.append @footer
 
-    globalManager.add(@) if @global
+      globalManager.add(@)
 
   append: (elements...) ->
-    elements = (e.el or e for e in elements)
-    @content.append(elements...)
+    @content.append(e.el or e) for e in elements
 
   html: ->
     @el.html.apply(@el, arguments)
