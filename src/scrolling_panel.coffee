@@ -1,4 +1,4 @@
-class ScrollingPanel extends Panel
+class Spine.Mobile.ScrollingPanel extends Spine.Mobile.Panel
 
   constructor: ->
     super
@@ -46,5 +46,3 @@ class ScrollingPanel extends Panel
   scrollTop: =>
     if @scroller
       @scroller.scrollToTop()
-
-(module?.exports = ScrollingPanel) or @ScrollingPanel = Panel
