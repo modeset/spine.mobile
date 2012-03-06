@@ -1,4 +1,4 @@
-class Panel extends Stage
+class Spine.Mobile.Panel extends Spine.Mobile.Stage
 
   tag:      'section'
   viewport: false
@@ -13,5 +13,3 @@ class Panel extends Stage
 
     # Make sure we render the panel offscreen
     @el.animate({translate3d: '100%, 0, 0'}, 0)
-
-(module?.exports = Panel) or @Panel = Panel

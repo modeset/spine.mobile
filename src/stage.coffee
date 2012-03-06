@@ -1,9 +1,11 @@
 $     = Spine.$
 
-globalManager = new Spine.Manager
+Spine.Mobile or= {}
 
-class Stage extends Spine.Controller
-  @globalManager: -> globalManager
+Spine.Mobile.globalManager = new Spine.Manager
+
+class Spine.Mobile.Stage extends Spine.Controller
+  @globalManager: -> Spine.Mobile.globalManager
   @globalStage:   -> @globalManager().controllers[0]
 
   effectDefaults:
@@ -116,7 +118,5 @@ class Stage extends Spine.Controller
             @trigger 'deactivated'
       setTimeout animation, 0
 
-class Stage.Global extends Stage
+class Spine.Mobile.Stage.Global extends Spine.Mobile.Stage
   global: true
-
-(module?.exports = Stage) or @Stage = Stage
