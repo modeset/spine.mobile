@@ -37,7 +37,7 @@ class Spine.Mobile.Stage extends Spine.Controller
       @el.append @content
       @el.append @footer
 
-      globalManager.add(@)
+      Spine.Mobile.Stage.globalManager.add(@)
 
   append: (elements...) ->
     @content.append(e.el or e) for e in elements
