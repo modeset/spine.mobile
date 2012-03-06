@@ -8,7 +8,7 @@ class Spine.Mobile.Panel extends Spine.Mobile.Stage
 
     # Register with the global stage
     @el.removeClass('stage').addClass('panel')
-    @stage ?= Stage.globalStage()
+    @stage ?= Spine.Mobile.Stage.globalStage()
     @stage?.add(@)
 
     # Make sure we render the panel offscreen
