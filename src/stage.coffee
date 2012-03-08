@@ -53,24 +53,37 @@ class Spine.Mobile.Stage extends Spine.Controller
     @append(panels...)
 
   activate: (params = {}) ->
-    effect = params.transition or params.trans
+    effect = params.transition or params.trans or 'appear'
     if effect
       @effects[effect].apply(this)
     else
-      @el.addClass('active')
+      @el.addClass 'active'
+      @trigger 'activated'
 
   deactivate: (params = {}) ->
     return unless @isActive()
-    effect = params.transition or params.trans
+    effect = params.transition or params.trans or 'appear'
     if effect
       @reverseEffects[effect].apply(this)
     else
-      @el.removeClass('active')
+      @el.removeClass 'active'
+      @trigger 'deactivated'
 
   isActive: ->
-    @el.hasClass('active')
+    @el.hasClass 'active'
 
   effects:
+    appear: ->
+      @el.addClass 'active'
+      @el.addClass 'transitioning'
+      opts = @effectOptions()
+
+      animation = =>
+        @el.animate { translate3d: '0, 0, 0' }, 0, null, =>
+          @el.removeClass 'transitioning'
+          @trigger 'activated'
+      setTimeout animation, 0
+
     left: ->
       @el.addClass 'active'
       @el.addClass 'transitioning'
@@ -96,6 +109,16 @@ class Spine.Mobile.Stage extends Spine.Controller
       setTimeout animation, 0
 
   reverseEffects:
+    appear: ->
+      opts = @effectOptions()
+      @el.addClass 'transitioning'
+      animation = =>
+        @el.animate { translate3d: '-100%0, 0, 0' }, 0, null, =>
+          @el.removeClass 'active'
+          @el.removeClass 'transitioning'
+          @trigger 'deactivated'
+      setTimeout animation, 0
+
     left: ->
       opts = @effectOptions()
       @el.addClass 'transitioning'
