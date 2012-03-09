@@ -1,21 +1,22 @@
-class Spine.AjaxProxy extends Spine.Module
+class Spine.Model.Ajax.ZeptoShim extends Spine.Module
 
   @include Spine.Events
 
   @setup: (parentObject) ->
-    if Spine.AjaxProxy.parentObject
-      throw "ERROR: Can't set up another proxy when one's already set"
-    Spine.AjaxProxy.parentObject = parentObject
-    Spine.AjaxProxy.originalAjax = parentObject.ajax
-    parentObject.ajax = Spine.AjaxProxy.proxiedAjax
+    klass = Spine.Model.Ajax.ZeptoShim 
+    throw "ERROR: Can't set up another proxy when one's already set" if klass.parentObject
+    klass.parentObject = parentObject
+    klass.originalAjax = parentObject.ajax
+    parentObject.ajax = klass.proxiedAjax
 
   @teardown: ->
-    if Spine.AjaxProxy.parentObject
-      Spine.AjaxProxy.parentObject.ajax = Spine.AjaxProxy.originalAjax
-      Spine.AjaxProxy.originalAjax = null
-      Spine.AjaxProxy.parentObject = null
+    klass = Spine.Model.Ajax.ZeptoShim 
+    if klass.parentObject
+      klass.parentObject.ajax = klass.originalAjax
+      klass.originalAjax = null
+      klass.parentObject = null
 
-  @proxiedAjax: (opts) -> new Spine.AjaxProxy(opts)
+  @proxiedAjax: (opts) -> new Spine.Model.Ajax.ZeptoShim(opts)
 
   constructor: (opts) ->
     @opts = opts
@@ -35,7 +36,7 @@ class Spine.AjaxProxy extends Spine.Module
       @bind 'complete', complete if error
     opts.complete = @completeResponse
 
-    @request = Spine.AjaxProxy.originalAjax(opts)
+    @request = Spine.Model.Ajax.ZeptoShim.originalAjax(opts)
 
   successResponse: (data, status, xhr) =>
     @trigger 'success', data, status, xhr
@@ -65,4 +66,4 @@ class Spine.AjaxProxy extends Spine.Module
     @
 
 
-Spine.AjaxProxy.setup($)
+Spine.Model.Ajax.ZeptoShim.setup($)
