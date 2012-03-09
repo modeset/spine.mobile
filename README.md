@@ -11,5 +11,6 @@ A few highlights:
 * Transitions that play a bit nicer with Zepto and Webkit
 * A scrolling panel that integrates nicely with the Modeset.js scroller (coming soon)
 * A Spine.Request object that provides a common wrapper around API URLs and AJAX options
+* A model extension for Rails-style timestamp recording
 * A template for model observers
 * A template for simple Singletons
