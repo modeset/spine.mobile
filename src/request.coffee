@@ -18,5 +18,5 @@ class Spine.Request extends Spine.Module
     options['headers'] or= {}
     options['headers']['Accept'] or= 'application/json'
     options['contentType']  or= 'application/json'
-    options['timeout'] or= Request.timeout
+    options['timeout'] or= Spine.Request.timeout
     $.ajax options
